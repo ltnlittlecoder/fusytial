@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>RESONANCE · 共振</title>
+<link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ============== 待机画面 TAP TO START ============== -->
+  <section class="screen" id="screen-title">
+    <canvas class="bg-canvas" id="title-bg"></canvas>
+    <div class="attract">
+      <div class="attract-logo">
+        <div class="logo-mark">RESONANCE</div>
+        <div class="logo-sub">共 振 · 节 奏 游 戏</div>
+      </div>
+      <div class="tap-hint" id="tap-hint">
+        <b>TAP TO START</b>
+        <span>点击 / 空格 / Enter 开始</span>
+      </div>
+      <div class="title-meta" id="title-meta"></div>
+      <div class="attract-foot">
+        <span>v1.2 · 音乐 / 谱面 / 背景全部程序化生成</span>
+        <span class="dot">·</span>
+        <span>建议戴耳机</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== 模式选取（手风琴） ============== -->
+  <section class="screen" id="screen-modes">
+    <canvas class="bg-canvas" id="modes-bg"></canvas>
+    <div class="modes-wrap">
+      <div class="modes-head">
+        <div class="mh-title">选择模式</div>
+        <div class="mh-sub">SELECT MODE · 点一张卡片展开它</div>
+      </div>
+      <div class="modes-body">
+        <div class="mode-list" id="mode-list"></div>
+        <div class="mode-detail hidden" id="mode-detail"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== 新手教程（动画演示 + 上机） ============== -->
+  <section class="screen" id="screen-tutorial">
+    <div class="tut-wrap">
+      <div class="tut-top">
+        <div class="tut-title">新手教程</div>
+        <div class="tut-steps" id="tut-steps"></div>
+        <div class="spacer"></div>
+        <button class="gbtn small" data-action="tut-skip">跳过教程</button>
+      </div>
+      <div class="tut-stage" id="tut-stage">
+        <canvas id="tut-art"></canvas>
+      </div>
+      <div class="tut-card" id="tut-card"></div>
+    </div>
+  </section>
+
+  <!-- ============== 档案 ============== -->
+  <section class="screen" id="screen-profile">
+    <div class="panel-head">
+      <button class="gbtn" data-action="back-modes">← 返回</button>
+      <h1>档案</h1>
+      <div class="spacer"></div>
+      <button class="gbtn" data-action="export-save">导出存档</button>
+      <button class="gbtn" data-action="import-save">导入存档</button>
+    </div>
+    <div class="tabs" id="profile-tabs"></div>
+    <div class="settings-body" id="profile-body"></div>
+  </section>
+
+  <!-- ============== 大地图 ============== -->
+  <section class="screen" id="screen-map">
+    <canvas id="map-canvas"></canvas>
+    <div class="map-hud top">
+      <button class="gbtn" data-action="back-modes">← 返回</button>
+      <div class="hud-pill" id="map-total-stars">★ 0</div>
+      <div class="hud-pill" id="map-progress">探索度 0%</div>
+      <div class="spacer"></div>
+      <div class="hud-hint">拖拽平移 · 滚轮缩放 · 点击节点选曲</div>
+      <button class="gbtn" data-action="open-settings">⚙</button>
+    </div>
+    <div class="map-chapter-bar" id="map-chapter-bar"></div>
+    <div class="map-zoom">
+      <button class="gbtn" data-action="zoom-in">＋</button>
+      <button class="gbtn" data-action="zoom-out">－</button>
+      <button class="gbtn" data-action="zoom-reset">⤢</button>
+    </div>
+    <div class="song-panel hidden" id="song-panel"></div>
+    <div class="map-tip hidden" id="map-tip"></div>
+  </section>
+
+  <!-- ============== 设置（预览铺满整屏，设置项靠右半透明） ============== -->
+  <section class="screen" id="screen-settings">
+    <div class="settings-preview" id="settings-preview"></div>
+    <div class="settings-pane">
+      <div class="settings-head">
+        <button class="gbtn small" data-action="settings-back">← 返回</button>
+        <h1>设置</h1>
+        <div class="spacer"></div>
+        <button class="gbtn small" data-action="reset-settings">恢复默认</button>
+      </div>
+      <div class="tabs" id="settings-tabs"></div>
+      <div class="settings-body" id="settings-body"></div>
+    </div>
+  </section>
+
+  <!-- ============== 创作工坊（谱面列表） ============== -->
+  <section class="screen" id="screen-workshop">
+    <div class="panel-head">
+      <button class="gbtn" data-action="back-modes">← 返回</button>
+      <h1>创作工坊</h1>
+      <div class="spacer"></div>
+      <button class="gbtn accent" data-action="new-chart">＋ 新建谱面</button>
+      <button class="gbtn" data-action="import-chart">导入 JSON</button>
+      <button class="gbtn" data-action="gen-chart">由乐曲生成草稿</button>
+      <input type="file" id="import-file" accept=".json,application/json" hidden>
+    </div>
+    <div class="ws-grid" id="ws-grid"></div>
+  </section>
+
+  <!-- ============== 编辑器 ============== -->
+  <section class="screen" id="screen-editor">
+    <div class="ed-top">
+      <button class="gbtn" data-action="ed-save-back">← 保存并返回</button>
+      <input class="ed-title" id="ed-title" placeholder="谱面标题">
+      <span class="ed-song-name" id="ed-song-name"></span>
+      <div class="spacer"></div>
+      <button class="gbtn" data-action="ed-playtest">▶ 试玩</button>
+      <button class="gbtn accent" data-action="ed-save">保存</button>
+      <button class="gbtn" data-action="ed-export">导出</button>
+    </div>
+    <div class="ed-body">
+      <div class="ed-tools" id="ed-tools">
+        <div class="tool-group" id="ed-note-tools"></div>
+        <div class="tool-group" id="ed-snap-tools"></div>
+        <div class="tool-group">
+          <button class="gbtn" data-action="ed-undo" title="撤销 (Ctrl+Z)">↶</button>
+          <button class="gbtn" data-action="ed-redo" title="重做 (Ctrl+Y)">↷</button>
+          <button class="gbtn" data-action="ed-copy" title="复制 (Ctrl+C)">⧉</button>
+          <button class="gbtn" data-action="ed-paste" title="粘贴 (Ctrl+V)">📋</button>
+          <button class="gbtn" data-action="ed-del" title="删除选中 (Del)">🗑</button>
+        </div>
+        <div class="tool-group">
+          <button class="gbtn" data-action="ed-mirror" title="水平镜像">⇄ 镜像</button>
+          <button class="gbtn" data-action="ed-quantize" title="量化到当前吸附">量化</button>
+          <button class="gbtn" data-action="ed-clear" title="清空谱面">清空</button>
+        </div>
+        <div class="tool-group grow">
+          <label class="mini">BPM <input type="number" id="ed-bpm" min="40" max="300" step="1"></label>
+          <label class="mini">偏移ms <input type="number" id="ed-offset" min="-500" max="500" step="1"></label>
+          <label class="mini">轨道 <select id="ed-lanes"><option>4</option><option>6</option><option>8</option></select></label>
+          <label class="mini">时长s <input type="number" id="ed-length" min="5" max="600" step="1"></label>
+        </div>
+      </div>
+      <div class="ed-main">
+        <canvas id="editor-canvas"></canvas>
+        <div class="ed-ruler" id="ed-status"></div>
+      </div>
+      <div class="ed-side">
+        <div class="ed-panel">
+          <h3>播放</h3>
+          <div class="row">
+            <button class="gbtn accent" data-action="ed-toggle-play">▶ 播放</button>
+            <button class="gbtn" data-action="ed-stop">⏹</button>
+            <button class="gbtn" data-action="ed-metro">🥁 节拍器</button>
+          </div>
+          <div class="row small" id="ed-time">0:00.000 / 0:00.000</div>
+          <label class="mini full">速度 <input type="range" id="ed-vol" min="0" max="1" step="0.05"></label>
+        </div>
+        <div class="ed-panel">
+          <h3>生成草稿</h3>
+          <label class="mini full">难度等级 <input type="range" id="ed-gen-level" min="1" max="14" step="1" value="7"><span id="ed-gen-level-v">7</span></label>
+          <div class="row"><button class="gbtn accent full" data-action="ed-generate">🎲 重新生成</button></div>
+          <div class="row small">基于乐曲节拍自动铺面，可再手动修改。</div>
+        </div>
+        <div class="ed-panel">
+          <h3>选中对象</h3>
+          <div id="ed-inspector" class="row small">未选中音符</div>
+        </div>
+        <div class="ed-panel">
+          <h3>快捷键</h3>
+          <div class="row small keys">
+            <div><kbd>空格</kbd> 播放/暂停</div><div><kbd>1</kbd>~<kbd>5</kbd> 切换音符类型</div>
+            <div><kbd>Q</kbd>/<kbd>E</kbd> 吸附加减</div><div><kbd>V</kbd> 播放头处切视角</div>
+            <div><kbd>Ctrl</kbd>+<kbd>Z</kbd> 撤销</div><div><kbd>Del</kbd> 删除</div>
+            <div><kbd>左键</kbd> 放置/框选</div><div><kbd>右键</kbd> 删除音符</div>
+            <div><kbd>滚轮</kbd> 缩放时间轴</div><div><kbd>右键拖拽</kbd> 平移</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== 游戏 ============== -->
+  <section class="screen" id="screen-game">
+    <canvas id="game-canvas"></canvas>
+    <div class="game-hud">
+      <!-- 顶部整条血量 -->
+      <div class="gh-lifebar"><div class="gh-life-fill" id="gh-life"></div></div>
+      <!-- 正上方：分数与实时精度 -->
+      <div class="gh-topcenter">
+        <div class="gh-score" id="gh-score">0</div>
+        <div class="gh-acc" id="gh-acc">100.00%</div>
+      </div>
+      <!-- 暂停键：周围一圈是曲目进度 -->
+      <button class="gh-pause" data-action="pause" id="gh-pause" title="暂停">
+        <svg class="gh-pause-ring" viewBox="0 0 44 44" aria-hidden="true">
+          <circle class="ring-bg" cx="22" cy="22" r="19"></circle>
+          <circle class="ring-fg" id="gh-pause-progress" cx="22" cy="22" r="19"></circle>
+        </svg>
+        <span class="gh-pause-icon">⏸</span>
+      </button>
+      <div class="gh-combo" id="gh-combo"><b>0</b><span>COMBO</span></div>
+      <!-- 右下角：曲名与难度（右对齐） -->
+      <div class="gh-botright">
+        <div class="gh-title" id="gh-title"></div>
+        <div class="gh-diff" id="gh-diff"></div>
+      </div>
+    </div>
+    <div class="countdown hidden" id="countdown"></div>
+    <div class="auto-badge hidden" id="auto-badge">AUTO PLAY</div>
+  </section>
+
+  <!-- ============== 暂停（无背景，只有符号按钮） ============== -->
+  <div class="overlay bare hidden" id="screen-pause">
+    <div class="ov-card bare">
+      <h2 class="pause-title">PAUSED</h2>
+      <div class="ov-btns sym">
+        <button class="sym-btn" data-action="resume" title="继续">▶</button>
+        <button class="sym-btn" data-action="restart" title="重开">⟲</button>
+        <button class="sym-btn" data-action="quit" title="退出">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== 结算（铺满整页） ============== -->
+  <div class="overlay bare hidden" id="screen-result">
+    <div class="ov-card full">
+      <div class="res-head">
+        <div class="res-grade" id="res-grade">S</div>
+        <div class="res-meta">
+          <h2 id="res-title"></h2>
+          <div id="res-diff" class="res-diff"></div>
+          <div id="res-stars" class="res-stars"></div>
+        </div>
+      </div>
+      <div class="res-list" id="res-grid"></div>
+      <div class="ov-btns sym">
+        <button class="sym-btn" data-action="res-retry" title="再来一次">⟲</button>
+        <button class="sym-btn" data-action="res-back-map" title="返回地图">⌂</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== 加载 ============== -->
+  <div class="overlay hidden" id="screen-loading">
+    <div class="load-card">
+      <div class="spin"></div>
+      <div id="load-text">载入中…</div>
+    </div>
+  </div>
+
+  <!-- ============== 通用弹窗 / 提示 ============== -->
+  <div class="overlay hidden" id="screen-modal">
+    <div class="ov-card" id="modal-card"></div>
+  </div>
+  <div id="toast-host"></div>
+</div>
+
+<script src="src/util.js"></script>
+<script src="src/store.js"></script>
+<script src="src/audio.js"></script>
+<script src="src/chart.js"></script>
+<script src="src/songs.js"></script>
+<script src="src/input.js"></script>
+<script src="src/engine.js"></script>
+<script src="src/render.js"></script>
+<script src="src/worldmap.js"></script>
+<script src="src/art.js"></script>
+<script src="src/screens.js"></script>
+<script src="src/preview.js"></script>
+<script src="src/frontend.js"></script>
+<script src="src/tutorial.js"></script>
+<script src="src/editor.js"></script>
+<script src="src/main.js"></script>
+</body>
+</html>
